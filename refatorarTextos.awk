@@ -29,6 +29,9 @@ BEGINFILE {
   insereTaglib();
 }
 
+/t:property.+label="\w+/ {
+}
+
 /n:column.+header="\w+/ {
   if (!MsgProp) {
     print "Erro: Nenhum arquivo de dicionário encontrado." > "/dev/tty";
