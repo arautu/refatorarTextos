@@ -7,10 +7,10 @@
 @include "sliic/libConvIsoUtf"
 @include "sliic/libInsertTaglib"
 @include "sliic/libJavaParser"
-@include "libColumTag"
 @include "libRefatorarTextos"
 
 BEGIN {
+  FPAT = "(<\\w:?\\w+)";
   findFiles(msgs_paths);
   nextTaglib = "<%@ taglib prefix=\"n\" uri=\"http://www.nextframework.org/tag-lib/next\"%>";
 }
@@ -22,39 +22,40 @@ BEGINFILE {
   print "\n==== Refatoração de textos ====\n" > "/dev/tty";
   print "Arquivo:", FILENAME > "/dev/tty";
   print "Properties:", MsgProp > "/dev/tty";
-
 }
 
 /taglib/ {
   insereTaglib();
 }
 
-/t:property.+label="\w+/ {
-}
-
-/n:column.+header="\w+/ {
+/t:property.+label="\w+/  ||
+/n:column.+header="\w+/   ||
+/<div.*>\s?(\${.*})?\s?\w.+/ ||
+/<n:panel.*>\s?(\${.*})?\s?\w.+/ {
   if (!MsgProp) {
     print "Erro: Nenhum arquivo de dicionário encontrado." > "/dev/tty";
      nextfile;
   }
-  id = getId();
-
-  fmt = removerIdentacao($0);
-  print " Refatorar:", fmt > "/dev/tty";
-    
   checkTaglib(nextTaglib);
-  initColumn($0);
-  codigo = getColumnCod(aMetaFile, id);
-  $0 = getColumni18n(codigo);
+ 
   fmt = removerIdentacao($0);
-  printf " Para: %s\n", fmt > "/dev/tty";
+  print " Instrução:", fmt > "/dev/tty";
+  id = getId();
+  
+  tag = $1 "Tag";
+  gsub(/\w+:|<|\s/, "", tag);
+  @tag($0, id, aMetaFile);
 
-  codigo = getColumCodComTexto(aMetaFile, id);
+  printf " Refatorar:\t%s\n", fmt > "/dev/tty";
+  $0 = getInstrucao();
+  fmt = removerIdentacao($0);
+  printf " Para:\t\t%s\n", fmt > "/dev/tty";
+
+  codigo = getCodigo(); 
   if ("inplace::begin" in FUNCTAB) {
     printf ("%s\r", codigo) >> MsgProp;
   }
   printf " Código: %s\n\n", codigo  > "/dev/tty";
-  endColumn();
 }
 
 {
