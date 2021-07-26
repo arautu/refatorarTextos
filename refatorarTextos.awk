@@ -31,6 +31,8 @@ BEGINFILE {
 /t:property.+label="\w+/  ||
 /n:column.+header="\w+/   ||
 /<div.*>\s?(\${.*})?\s?\w.+/ ||
+/<n:link.*>\s?(\${.*})?\s?\w.+/ ||
+/<n:submit.*>\s?(\${.*})?\s?\w.+/ ||
 /<n:panel.*>\s?(\${.*})?\s?\w.+/ {
   if (!MsgProp) {
     print "Erro: Nenhum arquivo de dicionário encontrado." > "/dev/tty";
@@ -56,6 +58,8 @@ BEGINFILE {
     printf ("%s\r", codigo) >> MsgProp;
   }
   printf " Código: %s\n\n", codigo  > "/dev/tty";
+  
+  findWhereFileIsIncluded(aMetaFile["file"]);
 }
 
 {

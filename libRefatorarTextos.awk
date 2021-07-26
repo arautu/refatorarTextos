@@ -4,6 +4,11 @@
 # Variáveis Globais
 # prt_instrucao
 # prt_codigo
+# prt_findIncludes 
+
+BEGINFILE {
+  prt_findIncludes = "";
+}
 
 # Interage com o usuário, através do terminal, para obter o identificador
 # único do código de dicionário.
@@ -49,6 +54,20 @@ function panelTag(instrucao, id, aMetaFile) {
   tag_refatorarTextoTag(instrucao, id, aMetaFile);
 }
 
+# Refatora textos entre tags link
+# De:   <n:link>texto<\n:link>
+# Para: <n:link>${n:messageViewPrefix('id')}<\n:link>
+function linkTag(instrucao, id, aMetaFile) {
+  tag_refatorarTextoTag(instrucao, id, aMetaFile);
+}
+
+# Refatora textos entre tags submit
+# De:   <n:submit>texto<\n:submit>
+# Para: <n:submit>${n:messageViewPrefix('id')}<\n:submit>
+function submitTag(instrucao, id, aMetaFile) {
+  tag_refatorarTextoTag(instrucao, id, aMetaFile);
+}
+
 # Retorna a instrução refatorada
 # Retorno:
 # * Instrução refatorada
@@ -69,6 +88,47 @@ function getCodigo() {
     return "";
   }
   return prt_codigo;
+}
+
+# Encontra os arquivos que usam a diretiva 'include' para incluir um
+# determinado arquivo. São dois tipos de tags procurados:
+# <jps:include ... />
+# <%@include ... %>
+# Argumentos:
+# * file: Nome do arquivo JSP que será procurado.
+# Retorno:
+# * Retorna uma mensagem na tela caso encontre o arquivo "file" sendo citado
+# em instruções 'include', além do caminho e nome destes arquivos.
+function findWhereFileIsIncluded(file,  i, includes, tmp, Oldrs) {
+  if (prt_findIncludes) {
+    return
+  }
+  prt_findIncludes = 1;
+  Oldrs = RS;
+  RS = "\n";
+  
+  absPath = absolutePath(ARGV[1]);
+  if (!absPath) {
+    exit 1;
+  }
+
+  grep = sprintf("grep -r -E -l --include=*.jsp \"<\\S+include.*/%s\" %s", file, absPath);
+  print grep |& "sh";
+  close("sh", "to");
+
+  while (("sh" |& getline tmp) > 0) {
+    includes[i++] = tmp;
+  }
+  close("sh");
+
+  if (isarray(includes)) {
+    printf "Atenção: Há %s arquivos que incluem o arquivo %s.\n", length(includes), FILENAME;
+    for (i in includes) {
+      printf " %s\n", includes[i];
+    }
+    printf "\n";
+  }
+  RS = Oldrs;
 }
 
 # Refatora instruções com texto entre tags, ex: <tag>texto<\tag> e monta
