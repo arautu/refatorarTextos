@@ -26,48 +26,6 @@ function getId(   Oldrs, id) {
   return id;
 } 
 
-# Refatora o campo label de property
-# De:   <t:property ... label="texto">
-# Para: <t:property ... label="${n:messageViewPrefix('id')}">
-function propertyTag(instrucao, id, aMetaFile) {
-  tag_refatorarTextoCampo(instrucao, id, aMetaFile, "label");
-}
-
-# Refatora o campo header de column
-# De:   <n:column header="texto">
-# Para: <n:column header="${n:messageViewPrefix('id')}">
-function columnTag(instrucao, id, aMetaFile) {
-  tag_refatorarTextoCampo(instrucao, id, aMetaFile, "header");
-}
-
-# Refatora textos entre tags div
-# De:   <div>texto<\div>
-# Para: <div>${n:messageViewPrefix('id')}<\div>
-function divTag(instrucao, id, aMetaFile) {
-  tag_refatorarTextoTag(instrucao, id, aMetaFile);
-}
-
-# Refatora textos entre tags panel
-# De:   <n:panel>texto<\n:panel>
-# Para: <n:panel>${n:messageViewPrefix('id')}<\n:panel>
-function panelTag(instrucao, id, aMetaFile) {
-  tag_refatorarTextoTag(instrucao, id, aMetaFile);
-}
-
-# Refatora textos entre tags link
-# De:   <n:link>texto<\n:link>
-# Para: <n:link>${n:messageViewPrefix('id')}<\n:link>
-function linkTag(instrucao, id, aMetaFile) {
-  tag_refatorarTextoTag(instrucao, id, aMetaFile);
-}
-
-# Refatora textos entre tags submit
-# De:   <n:submit>texto<\n:submit>
-# Para: <n:submit>${n:messageViewPrefix('id')}<\n:submit>
-function submitTag(instrucao, id, aMetaFile) {
-  tag_refatorarTextoTag(instrucao, id, aMetaFile);
-}
-
 # Retorna a instrução refatorada
 # Retorno:
 # * Instrução refatorada
@@ -122,18 +80,18 @@ function findWhereFileIsIncluded(file,  i, includes, tmp, Oldrs) {
   close("sh");
 
   if (isarray(includes)) {
-    printf "Atenção: Há %s arquivos que incluem o arquivo %s.\n", length(includes), FILENAME;
+    printf "Atenção: Há %s arquivos que incluem o arquivo %s.\n", length(includes), FILENAME > "/dev/tty";
     for (i in includes) {
-      printf " %s\n", includes[i];
+      printf " %s\n", includes[i] > "/dev/tty";
     }
-    printf "\n";
+    printf "\n" > "/dev/tty";
   }
   RS = Oldrs;
 }
 
 # Refatora instruções com texto entre tags, ex: <tag>texto<\tag> e monta
 # o código de dicionário correspondente.
-function tag_refatorarTextoTag(instrucao, id, aMetaFile,   texto, i, atag, seps, fieldpat) {
+function refatorarTextoTag(instrucao, id, aMetaFile,   texto, i, atag, seps, fieldpat) {
   prt_init();
   fieldpat = "(<[^>]+>)|(\\${[^}]+})|([^$<]+)";
   patsplit(instrucao, atag, fieldpat, seps);
@@ -156,7 +114,7 @@ function tag_refatorarTextoTag(instrucao, id, aMetaFile,   texto, i, atag, seps,
 
 # Refatora instruções que o texto se encontra em um campo da tag,
 #  ex: <tag campo="texto"> e monta o código de dicionário correspondente.
-function tag_refatorarTextoCampo(instrucao, id, aMetaFile, campos,  texto, i, atag, seps, fieldpat) {
+function refatorarTextoCampo(instrucao, id, aMetaFile, campos,  texto, i, atag, seps, fieldpat) {
   prt_init();
   fieldpat = "(\\w+=)|(\"[^\"]*\")";
   patsplit(instrucao, atag, fieldpat, seps);

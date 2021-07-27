@@ -28,12 +28,9 @@ BEGINFILE {
   insereTaglib();
 }
 
-/t:property.+label="\w+/  ||
-/n:column.+header="\w+/   ||
-/<div.*>\s?(\${.*})?\s?\w.+/ ||
-/<n:link.*>\s?(\${.*})?\s?\w.+/ ||
-/<n:submit.*>\s?(\${.*})?\s?\w.+/ ||
-/<n:panel.*>\s?(\${.*})?\s?\w.+/ {
+(/label="\w+/ && key="label") ||
+(/hearder="\w+/ && key="header") ||
+(/>\s?(\${.*})?\s?[[:alpha:]].+/ && key="tag") {
   if (!MsgProp) {
     print "Erro: Nenhum arquivo de dicionário encontrado." > "/dev/tty";
      nextfile;
@@ -44,9 +41,14 @@ BEGINFILE {
   print " Instrução:", fmt > "/dev/tty";
   id = getId();
   
-  tag = $1 "Tag";
-  gsub(/\w+:|<|\s/, "", tag);
-  @tag($0, id, aMetaFile);
+  switch(key) {
+    case /label|header/:
+      refatorarTextoCampo($0, id, aMetaFile, key);
+      break;
+    case "tag":
+      refatorarTextoTag($0, id, aMetaFile);
+      break;
+  }
 
   printf " Refatorar:\t%s\n", fmt > "/dev/tty";
   $0 = getInstrucao();
