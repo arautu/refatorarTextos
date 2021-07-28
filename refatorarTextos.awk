@@ -16,12 +16,10 @@ BEGIN {
 }
 
 BEGINFILE {
+  oneShot = 0;
   parserFilePath(FILENAME, aMetaFile);
   MsgProp = locProperties(aMetaFile, msgs_paths);
   convertIso8859ToUtf8();
-  print "\n==== Refatoração de textos ====\n" > "/dev/tty";
-  print "Arquivo:", FILENAME > "/dev/tty";
-  print "Properties:", MsgProp > "/dev/tty";
 }
 
 /taglib/ {
@@ -33,41 +31,54 @@ BEGINFILE {
 (/>\s?(\${.*})?\s?[[:alpha:]].+/ && key="tag") {
   if (!MsgProp) {
     print "Erro: Nenhum arquivo de dicionário encontrado." > "/dev/tty";
-     nextfile;
+    nextfile;
   }
-  checkTaglib(nextTaglib);
- 
-  fmt = removerIdentacao($0);
-  print " Instrução:", fmt > "/dev/tty";
-  id = getId();
-  
-  switch(key) {
-    case /label|header/:
-      refatorarTextoCampo($0, id, aMetaFile, key);
-      break;
-    case "tag":
-      refatorarTextoTag($0, id, aMetaFile);
-      break;
-  }
+  if (OldFilename != FILENAME) {
+    if (!oneShot) {
+      oneShot = 1;
+      rewind();
+      checkTaglib(nextTaglib);
+      print "\n==== Refatoração de textos ====\n" > "/dev/tty";
+      print "Arquivo:", FILENAME > "/dev/tty";
+      print "Properties:", MsgProp > "/dev/tty";
+    }
+  } else {
+    fmt = removerIdentacao($0);
+    print " Instrução:", fmt > "/dev/tty";
+    id = getId();
 
-  printf " Refatorar:\t%s\n", fmt > "/dev/tty";
-  $0 = getInstrucao();
-  fmt = removerIdentacao($0);
-  printf " Para:\t\t%s\n", fmt > "/dev/tty";
+    switch(key) {
+      case /label|header/:
+        refatorarTextoCampo($0, id, aMetaFile, key);
+        break;
+      case "tag":
+        refatorarTextoTag($0, id, aMetaFile);
+        break;
+    }
 
-  codigo = getCodigo(); 
-  if ("inplace::begin" in FUNCTAB) {
-    printf ("%s\r", codigo) >> MsgProp;
+    printf " Refatorar:\t%s\n", fmt > "/dev/tty";
+    $0 = getInstrucao();
+    fmt = removerIdentacao($0);
+    printf " Para:\t\t%s\n", fmt > "/dev/tty";
+
+    codigo = getCodigo(); 
+    if ("inplace::begin" in FUNCTAB) {
+      printf ("%s\r", codigo) >> MsgProp;
+    }
+    printf " Código: %s\n\n", codigo  > "/dev/tty";
+
+    findWhereFileIsIncluded(aMetaFile["file"]);
   }
-  printf " Código: %s\n\n", codigo  > "/dev/tty";
-  
-  findWhereFileIsIncluded(aMetaFile["file"]);
 }
 
 {
   if ("inplace::begin" in FUNCTAB) {
     printf "%s%s", $0, RT;
   }
+}
+
+ENDFILE {
+  OldFilename = FILENAME;
 }
 
 END {
