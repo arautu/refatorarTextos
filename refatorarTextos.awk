@@ -27,7 +27,14 @@ BEGINFILE {
 }
 
 (/label="\w+/ && key="label") ||
-(/hearder="\w+/ && key="header") ||
+(/labelBotao="\w+/ && key="labelBotao") ||
+(/labelTag="\w+/ && key="labelTag") ||
+(/descricao="\w+/ && key="descricao") ||
+(/header="\w+/ && key="header") ||
+(/value="\w+/ && key="value") ||
+(/confirmationMessage="\w+/ && key="confirmationMessage") ||
+(/legend="\w+/ && key="legend") ||
+(/title="\w+/ && key="title") ||
 (/>\s?(\${.*})?\s?[[:alpha:]].+/ && key="tag") {
   if (!MsgProp) {
     print "Erro: Nenhum arquivo de dicionário encontrado." > "/dev/tty";
@@ -48,11 +55,11 @@ BEGINFILE {
     id = getId();
 
     switch(key) {
-      case /label|header/:
-        refatorarTextoCampo($0, id, aMetaFile, key);
-        break;
       case "tag":
         refatorarTextoTag($0, id, aMetaFile);
+        break;
+      default :
+        refatorarTextoCampo($0, id, aMetaFile, key);
         break;
     }
 
@@ -63,7 +70,7 @@ BEGINFILE {
 
     codigo = getCodigo(); 
     if ("inplace::begin" in FUNCTAB) {
-      printf ("%s\r", codigo) >> MsgProp;
+      printf ("%s\r\n", codigo) >> MsgProp;
     }
     printf " Código: %s\n\n", codigo  > "/dev/tty";
 

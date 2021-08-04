@@ -31,7 +31,7 @@ function getId(   Oldrs, id) {
 # * Instrução refatorada
 function getInstrucao() {
   if (!prt_instrucao) {
-    print "Erro: Não há instrução refatorada";
+    print "Erro: Não há instrução refatorada" > "/dev/tty";
     return "";
   }
   return prt_instrucao;
@@ -42,7 +42,7 @@ function getInstrucao() {
 # * Código de dicionário
 function getCodigo() {
   if (!prt_codigo) {
-    print "Erro: Não há instrução refatorada";
+    print "Erro: Não há instrução refatorada" > "/dev/tty";
     return "";
   }
   return prt_codigo;
