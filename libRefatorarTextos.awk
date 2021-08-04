@@ -89,21 +89,23 @@ function findWhereFileIsIncluded(file,  i, includes, tmp, Oldrs) {
   RS = Oldrs;
 }
 
-# Refatora instruções com texto entre tags, ex: <tag>texto<\tag> e monta
-# o código de dicionário correspondente.
-function refatorarTextoTag(instrucao, id, aMetaFile,   texto, i, atag, seps, fieldpat) {
+# Procura por textos em instruções contendo tags, construindo a instrução
+# refatorada e o respectivo código de dicionário.
+function refatorarTextos(instrucao, id, aMetaFile, key, texto) {
   prt_init();
-  fieldpat = "(<[^>]+>)|(\\${[^}]+})|([^$<]+)";
-  patsplit(instrucao, atag, fieldpat, seps);
   prt_instrucao = "";
   prt_codigo = "";
-
-  for (i in atag) {
-    if (atag[i] ~ /^\s?\w+/) {
-      texto = atag[i];
-      gsub(/^\s|\s$/, "", texto);
-      atag[i] = gensub(/(^\s)?\S+( \S+)*(\s$)?/,sprintf("\\1${n:messageViewPrefix('%s')}\\3", id), "g", atag[i]);
-    }
+  switch (key) {
+    case "tag":
+      texto = prt_textoEntreTags($0, id);
+      break;
+    default:
+      if (instrucao ~ "t:property") {
+        texto = prt_textoEmProperty($0, key);
+      } else {
+        texto = prt_textoEmCampo($0, id, key);
+      }
+      break;
   }
   for (i in seps) {
     prt_instrucao = prt_instrucao sprintf ("%s%s", atag[i], seps[i]);
@@ -112,27 +114,63 @@ function refatorarTextoTag(instrucao, id, aMetaFile,   texto, i, atag, seps, fie
   prt_end();
 }
 
-# Refatora instruções que o texto se encontra em um campo da tag,
+# Refatora instruções com texto entre tags, ex: <tag>texto<\tag> e monta
+# o código de dicionário correspondente.
+#  Retorno:
+#  * atag: partes da instrução refatorados.
+#  * seps: outras partes da instrução.
+#  * texto.
+function prt_textoEntreTags(instrucao, id,   texto, i, fieldpat) {
+  fieldpat = "(<[^>]+>)|(\\${[^}]+})|([^$<]+)";
+  patsplit(instrucao, atag, fieldpat, seps);
+  for (i in atag) {
+    if (atag[i] ~ /^\s?\w+/) {
+      texto = atag[i];
+      gsub(/^\s|\s$/, "", texto);
+      atag[i] = gensub(/(^\s)?\S+( \S+)*(\s$)?/,sprintf("\\1${n:messageViewPrefix('%s')}\\3", id), "g", atag[i]);
+    }
+  }
+  return texto;
+}
+
+# Refatora tags t:property que contenham textos.
 #  ex: <tag campo="texto"> e monta o código de dicionário correspondente.
-function refatorarTextoCampo(instrucao, id, aMetaFile, campos,  texto, i, atag, seps, fieldpat) {
-  prt_init();
+#  Retorno:
+#  * atag: partes da instrução refatorados.
+#  * seps: outras partes da instrução.
+#  * texto.
+function prt_textoEmProperty(instrucao, campo,  texto, i, fieldpat) {
   fieldpat = "(\\w+=)|(\"[^\"]*\")";
   patsplit(instrucao, atag, fieldpat, seps);
-  prt_instrucao = "";
-  prt_codigo = "";
   
-    for (i=1; i <= length(atag); i++) {
-      if (atag[i] ~ campos"=") {
-        texto = atag[++i];
-        atag[i] = sprintf("\"${n:messageViewPrefix('%s')}\"", id);
-      }
+  for (i=1; i <= length(atag); i++) {
+    if (atag[i] ~ campo"=") {
+      delete atag[i];
+      delete seps[i];
+      texto = atag[++i];
+      delete atag[i];
     }
-  for (i in seps) {
-    prt_instrucao = prt_instrucao sprintf ("%s%s", atag[i], seps[i]);
   }
-  gsub("\"", "", texto);
-  prt_codigo = aMetaFile["module"] "." aMetaFile["file"] "." id "=" texto;
-  prt_end();
+  return texto;
+}
+
+# Refatora instruções que o texto se encontra em um campo da tag,
+#  ex: <tag campo="texto"> e monta o código de dicionário correspondente.
+#  Retorno:
+#  * atag: partes da instrução refatorados.
+#  * seps: outras partes da instrução.
+#  * texto.
+function prt_textoEmCampo(instrucao, id, campo,  texto, i, fieldpat) {
+  fieldpat = "(\\w+=)|(\"[^\"]*\")";
+  patsplit(instrucao, atag, fieldpat, seps);
+
+  for (i=1; i <= length(atag); i++) {
+    if (atag[i] ~ campo"=") {
+      texto = atag[++i];
+      atag[i] = sprintf("\"${n:messageViewPrefix('%s')}\"", id);
+    }
+  }
+  return texto;
 }
 
 # Salva parâmetros goblais.

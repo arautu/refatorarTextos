@@ -54,14 +54,7 @@ BEGINFILE {
     print " Instrução:", fmt > "/dev/tty";
     id = getId();
 
-    switch(key) {
-      case "tag":
-        refatorarTextoTag($0, id, aMetaFile);
-        break;
-      default :
-        refatorarTextoCampo($0, id, aMetaFile, key);
-        break;
-    }
+    refatorarTextos($0, id, aMetaFile, key);
 
     printf " Refatorar:\t%s\n", fmt > "/dev/tty";
     $0 = getInstrucao();
