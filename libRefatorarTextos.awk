@@ -91,7 +91,7 @@ function findWhereFileIsIncluded(file,  i, includes, tmp, Oldrs) {
 
 # Procura por textos em instruções contendo tags, construindo a instrução
 # refatorada e o respectivo código de dicionário.
-function refatorarTextos(instrucao, id, aMetaFile, key, texto) {
+function refatorarTextos(instrucao, aMetaFile, controller, id, key,  texto) {
   prt_init();
   prt_instrucao = "";
   prt_codigo = "";
@@ -110,7 +110,8 @@ function refatorarTextos(instrucao, id, aMetaFile, key, texto) {
   for (i in seps) {
     prt_instrucao = prt_instrucao sprintf ("%s%s", atag[i], seps[i]);
   }
-  prt_codigo = aMetaFile["module"] "." aMetaFile["file"] "." id "=" texto;
+  gsub("\"", "", texto);
+  prt_codigo = aMetaFile["module"] "." controller "."  aMetaFile["file"] "." id "=" texto;
   prt_end();
 }
 

@@ -7,6 +7,7 @@
 @include "sliic/libConvIsoUtf"
 @include "sliic/libInsertTaglib"
 @include "sliic/libJavaParser"
+@include "sliic/libLocController"
 @include "libRefatorarTextos"
 
 BEGIN {
@@ -48,13 +49,14 @@ BEGINFILE {
       print "\n==== Refatoração de textos ====\n" > "/dev/tty";
       print "Arquivo:", FILENAME > "/dev/tty";
       print "Properties:", MsgProp > "/dev/tty";
+      controller = locController(FILENAME, aMetaFile);
     }
   } else {
     fmt = removerIdentacao($0);
-    print " Instrução:", fmt > "/dev/tty";
+    print " Instrução:", FNR, fmt > "/dev/tty";
     id = getId();
 
-    refatorarTextos($0, id, aMetaFile, key);
+    refatorarTextos($0, aMetaFile, controller, id, key);
 
     printf " Refatorar:\t%s\n", fmt > "/dev/tty";
     $0 = getInstrucao();

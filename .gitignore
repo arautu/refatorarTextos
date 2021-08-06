@@ -1,3 +1,6 @@
 tags
 sliic-erp
 *.txt
+.gawk_history
+.gawkrc
+
