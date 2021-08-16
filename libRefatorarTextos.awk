@@ -99,12 +99,15 @@ function refatorarTextos(instrucao, aMetaFile, controller, id, key,  texto) {
     case "tag":
       texto = prt_textoEntreTags($0, id);
       break;
-    default:
+    case "label":
       if (instrucao ~ "t:property") {
         texto = prt_textoEmProperty($0, key);
       } else {
         texto = prt_textoEmCampo($0, id, key);
       }
+      break;
+    default:
+      texto = prt_textoEmCampo($0, id, key);
       break;
   }
   for (i in seps) {

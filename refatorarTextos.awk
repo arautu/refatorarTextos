@@ -32,7 +32,7 @@ BEGINFILE {
 (/labelTag="\w+/ && key="labelTag") ||
 (/descricao="\w+/ && key="descricao") ||
 (/header="\w+/ && key="header") ||
-(/value="\w+/ && key="value") ||
+(/n:output .*value="\w+/ && key="value") ||
 (/confirmationMessage="\w+/ && key="confirmationMessage") ||
 (/legend="\w+/ && key="legend") ||
 (/title="\w+/ && key="title") ||
