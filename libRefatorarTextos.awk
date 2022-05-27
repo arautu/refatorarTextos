@@ -111,7 +111,7 @@ function refatorarTextos(instrucao, aMetaFile, controller, id, key,  texto) {
       break;
   }
   for (i in seps) {
-    prt_instrucao = prt_instrucao sprintf ("%s%s", atag[i], seps[i]);
+    prt_instrucao = prt_instrucao sprintf("%s%s", atag[i], seps[i]);
   }
   gsub("\"", "", texto);
   prt_codigo = aMetaFile["module"] "." controller "."  aMetaFile["file"] "." id "=" texto;
@@ -131,7 +131,7 @@ function prt_textoEntreTags(instrucao, id,   texto, i, fieldpat) {
     if (atag[i] ~ /^\s?\w+/) {
       texto = atag[i];
       gsub(/^\s|\s$/, "", texto);
-      atag[i] = gensub(/(^\s)?\S+( \S+)*(\s$)?/,sprintf("\\1${n:messageViewPrefix('%s')}\\3", id), "g", atag[i]);
+      atag[i] = gensub(/(^\s)?\S+( \S+)*(\s$)?/,sprintf("\\1${n:messageView('%s')}\\3", id), "g", atag[i]);
     }
   }
   return texto;
@@ -171,7 +171,7 @@ function prt_textoEmCampo(instrucao, id, campo,  texto, i, fieldpat) {
   for (i=1; i <= length(atag); i++) {
     if (atag[i] ~ campo"=") {
       texto = atag[++i];
-      atag[i] = sprintf("\"${n:messageViewPrefix('%s')}\"", id);
+      atag[i] = sprintf("\"${n:messageView('%s')}\"", id);
     }
   }
   return texto;
